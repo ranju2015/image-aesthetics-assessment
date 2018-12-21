@@ -19,6 +19,10 @@ It holds all notebooks for the different datasets which were evaluated + the tra
 
 [notebooks](notebooks)
 
+Exploratory Data Analysis for AVA dataset:
+
+[notebooks/EDA_AVA.pdf](notebooks/EDA_AVA.pdf)
+
 The overall training shell script with all the model parameters
 
 [notebooks/trainings.sh](notebooks/trainings.sh)
