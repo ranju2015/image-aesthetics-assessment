@@ -72,7 +72,7 @@ num.ratings.df <-  df %>%
 plot.dist.num.ratings <- num.ratings.df %>%
   ggplot() +
   geom_histogram(aes(number), fill='steelblue', bins=50) +
-  labs(title="Number of Ratings per image",
+  labs(title="",
         y ="Number Of Images", x = "Number Of Ratings")
 
 plot.dist.rating.mean <- df %>%
@@ -283,7 +283,7 @@ $$EMD(P,Q) = \dfrac{\sum\limits_{i=1}^m \sum\limits_{j=1}^n f_{ij} d_{ij}}{\sum\
 
 To compare qualitative results  the __Accuracy__ is used.
 The accuracy is the ratio of correct predictions. In this case the ground-truth and predicted mean scores using
-a threshold of 5 on the "official" test set, as this the standard practice for AVA dataset.
+a threshold of 5 on the "official" test set, as this is the standard practice for AVA dataset.
 
 $$ACC = \frac{TP+TN}{TP+FP+TN+FN}$$
 
@@ -297,13 +297,13 @@ $$TP: TruePositives, TN: TrueNegatives, FN: FalseNegatives, FP: FalsePositive$$
 
 ### Data Exploration
 
-The AVA (Aesthetic Visual Analysis) image dataset which was introduced by [@avadataset], [@murray2012ava] is the reference dataset for all kind of image aesthetics. The dataset contains `r dim(df)[1]` images, along with a wide range of aestehetic semantic and photographic style annotations. The images were collected from www.dpchallenge.com. 
+The AVA (Aesthetic Visual Analysis) image dataset which was introduced by [@avadataset], [@murray2012ava] is the reference dataset for all kind of image aesthetics. The dataset contains `r dim(df)[1]` images, along with a wide range of aesthetic, semantic and photographic style annotations. The images were collected from www.dpchallenge.com. 
 
 
 
 #### Sample rows
 
-```{r, fig.cap='}
+```{r, fig.cap='Sample rows from dataset'}
 kable(df %>% select(-rating.mean.bucket) %>% sample_n(size=5))
 ```
 
@@ -341,7 +341,7 @@ summarytools::descr(df$rating.mean, style = "rmarkdown", omit.headings=T, stats=
 
 #### Distribution of number of Ratings
 
-```{r}
+```{r, fig.cap='Number of ratings per image: Majority is rated by more than 100 raters'}
 plot.dist.num.ratings
 ```
 
@@ -355,14 +355,14 @@ It can be seen that all images are rated by a high numbers of raters. This is ve
 
 #### Distribution of Mean Ratings
 
-```{r, fig.height=6,fig.width=6, include=T, fig.cap='Number of ratings per image: Majority is rated by more than 100 raters'}
+```{r, fig.height=6,fig.width=6, include=T, fig.cap='Distribution of rating mean'}
 library(grid)
-grid.arrange(plot.dist.rating.mean, plot.boxplot.rating.mean, ncol=2, top = textGrob("Distribution of Image Mean Ratings",gp=gpar(fontsize=20,font=3)))
+grid.arrange(plot.dist.rating.mean, plot.boxplot.rating.mean, ncol=2)
 ```
 
 It can be seen from the distribution and the descriptive statistics that 50% of images has a rating mean within 4.9 and 5.9 and about 85% are between 3.9 and 6.8. From the boxplot it can be seen that rating means above 7.2 and below 3.5 are outliers in the way that these values are very rare.
 
-This is problematic that our model performance might not sufficient for images with very good and bad quality.
+This is problematic thas the model performance might not sufficient for images with very good and bad quality.
 
 ### Algorithms and Techniques
 
@@ -416,13 +416,13 @@ The data preprocessing can be devided into two parts: The first part was done du
 \newpage
 The second preprocessing step is performed during training:
 
-1. Splitting of the data into training, validation
+1. Splitting of the data into training and validation set
 
-   10% of images of the training set are used for validation.
+    10% of images of the training set are used for validation.
 
 1. Basemodel specific preprocessing were performed
   
-    Each basemodel provided by Keras offers a preprocessing function with specific preprocessing steps for this model. This preprocessing step is applied to ImageGenerator which loads the images for training and model evaluation. 
+    Each basemodel provided by Keras offers a preprocessing function with specific preprocessing steps for this model. This preprocessing step is applied to a ImageGenerator which loads the images for training and model evaluation. 
     
 2. Normalization of distribution
 
@@ -430,7 +430,7 @@ The second preprocessing step is performed during training:
   
 2. Image resizing and random cropping
 
-    The training images are rescaled to 256 x 256 px and afterwards a randomly performed crop of 224 x 224 px is extracted. This is reported to reduce overfitting issues. [@talebi2018nim]
+    The training images are rescaled to 256 x 256 px and afterwards a randomly performed crop of 224 x 224 px is extracted. This is reported to reduce overfitting issues. [@talebi2018nima]
 
 3. Undersampling of the data
 
@@ -439,15 +439,15 @@ The second preprocessing step is performed during training:
 
 ### Implementation
 
-The goal was to create a clear training script which can be parameterized from outsite for triggering the different trainings. To reduce the lines of code of this training script it orchestrates the building blocks of the training with a pipeline script.
+The goal was to create a clear training script which can be parameterized from outsite for triggering the different trainings. To reduce the lines of code of this training script, it orchestrates the building blocks of the training with a pipeline script.
 
 1. All needed libraries are identified and put into a requirements.txt
 
-2. An internal library to download the AVA images and the meta data are implemented.
+2. An internal library to download the AVA images and the meta data is implemented.
 
 3. A training script was created with building blocks for training (loading data, preparing data, train, evaluate)
 
-4. Building blocks of the training script are moved to pipeline script. The scripts saves different artifacts: Model architecture, Model weights, training history, time for training, training visualization
+4. Building blocks of the training script are moved to a pipeline script. The scripts saves different artifacts: Model architecture, Model weights, training history, time for training, training visualization
 
 5. A model class is created, which encapsulates the basemodel and top model and offers helper functions to change  optimizer and freeze layers on the fly 
 
@@ -474,7 +474,7 @@ The top model consists of two layers. The first layer is a dropout layer to redu
 
 
 
-```{r, out.width='200%', fig.cap="Design of top model: Dropout Layer for avoiding overfitting, Dense layer with 10 output classes"}
+```{r, out.width='300%', fig.cap="Design of top model: Dropout Layer for avoiding overfitting, Dense layer with 10 output classes"}
 include_graphics('resources/top_model_plot.png')
 ```
 
@@ -486,7 +486,7 @@ Several parameters were used for model refinement:
 
 - Learning rate for dense layers and all layers
 - Learning rate decay for dense layers and all layers
-- Number of epochs for for dense layers and all layers
+- Number of epochs for dense layers and all layers
 - Number of images per rating bin used for training
 - Dropout ratio for dropout layer in top model
 
@@ -495,7 +495,7 @@ The training is done in iterative way: First the model is trained with very few 
 The training process is supervised with plots for the loss on the training and validation set to check if everything works well and to optimize the learning process.
 
 
-```{r, out.width = "70%", fig.cap='The plots for training history is used to find the best number of  epochs for the two learning phases. During phase 1 validation loss flattens at epoch 5 (4 in plot ) and in phase 2 the val loss flattens at epoch 8 (12 in plot)'}
+```{r, out.width = "80%", fig.cap='The plots for training history is used to find the best number of  epochs for the two learning phases. During phase 1 validation loss flattens at epoch 5 (4 in plot ) and in phase 2 the val loss flattens at epoch 8 (12 in plot)'}
 include_graphics('resources/training_history.png')
 ```
 
@@ -504,7 +504,7 @@ include_graphics('resources/training_history.png')
 
 ### Model Evaluation and Validation
 
-Out of the different models `r best_model$name` was chosen as it's EMD loss value is the lowest and it's accuracy is the highest among all models on the test set. The results are trustful, as the test set is the "official" test set for AVA and the model never saw these images during training or validation. An interesting is that this model performs slightly better than model9, which was trained with double the amount of training images.
+Out of the different models `r best_model_name` was chosen as it's EMD loss value is the lowest and it's accuracy is the highest among all models on the test set. The results are trustful, as the test set is the "official" test set for AVA and the model never saw these images during training or validation. An interesting fact is that this model performs slightly better than model9, which was trained with double the amount of training images.
 
 ```{r, fig.cap='Valdidation metrics for different models trained during this work'}
 kable(models_df %>% select(model, acc, emd) %>% arrange(desc(acc)) %>% 
@@ -569,7 +569,7 @@ include_graphics('resources/food.png')
 ```
 
 
-It can bes seen, that the images which we as a human beeing would rate better are also rated better by the model, although the food images are almost the same quality. 
+It can be seen, that the images which we as a human being would rate better are also rated better by the model, although the food images are almost the same quality. 
 
 
 ### Reflection
@@ -584,7 +584,7 @@ The process used for this project can be summarized using the following steps
 5. The technical infrastructure for the project was set up
 6. Models were trained and finetuned and checked against the benchmarks, till a good enough model was found, that solves the problem
 
-The project was very challanging for me as I had limited compute power and the dataset is very large. Almost till the end I was not able to train the models on the full training set as there were always problems like running out of memory and Keras and Tensorflow specific problems. I was at some point stuck, as the models performed badly. After doing an additional research round I found the Nima paper from Google, which was so brandnew that it wasn't published when I started the project in july. The insights from the paper were a breakthrough, especially the usage of the Earth Movers Loss and the usage of the MobileNet archtitecture for the base model. I am very proud that I could get a accuracy which was within the boundaries of the relevant papers and mastered a topic that is very hot in the moment, especially as I used less images than the researchers in the papers. 
+The project was very challanging for me as I had limited compute power and the dataset is very large. Till the end I was not able to train the models on the full training set as there were always problems like running out of memory and Keras and Tensorflow specific problems. I was at some point stuck, as the models performed badly. After doing an additional research round I found the Nima paper from Google, which was so brandnew that it wasn't published when I started the project in july. The insights from the paper were a breakthrough, especially the usage of the Earth Movers Loss and the usage of the MobileNet archtitecture for the base model. I am very proud that I could get a accuracy which was within the boundaries of the relevant papers and mastered a topic that is very hot in the moment, especially as I used less images than the researchers in the papers. 
 
 
 ### Improvement
