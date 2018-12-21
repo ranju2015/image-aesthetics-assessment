@@ -6,7 +6,7 @@ The project uses the AVA dataset which can be downloaded here (32 GB):
 
 [AVA dataset](http://academictorrents.com/details/71631f83b11d3d79d8f84efe0a7e12f0ac001460)
 
-The metadata is hosted on Github and will be downloaded
+The metadata is hosted on Github and will be checked out at the beginning of the training.
 
 ## Report for the Project
 
@@ -14,7 +14,8 @@ The metadata is hosted on Github and will be downloaded
 
 ## Notebooks/Scripts
 
-The scripts are located in the notebook folder. It holds all notebooks for the diffrent datasets which were evaluted:
+The scripts are located in the notebook folder. 
+It holds all notebooks for the different datasets which were evaluated + the training script:
 
 [notebooks](notebooks)
 
@@ -29,7 +30,6 @@ The main training script:
 Code modules:
 
 [notebooks/imageaesthetics](notebooks/imageaesthetics)
-
 
 
 ## Best model
