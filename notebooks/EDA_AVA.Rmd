@@ -1,0 +1,303 @@
+---
+title: "Exploratory Data Analysis for AVA Dataset"
+author: "Jens Laufer"
+date: "9 Juli 2018"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=TRUE, echo=F, message=F, warning=F}
+knitr::opts_chunk$set(echo = T, warning=F, message=T, fig.width = 20, fig.height = 10)
+```
+
+```{r}
+library(tidyverse)
+library(imager)
+library(glue)
+library(ggthemes)
+library(scales)
+library(radiant.data)
+library(corrplot)
+library(gridExtra)
+```
+
+```{r}
+DATASET.PATH = '../data/ava_downloader/AVA_dataset'
+```
+
+```{r}
+train_df <-  read_csv(glue("{DATASET.PATH}/train.csv"))
+test_df <- read_csv(glue("{DATASET.PATH}/test.csv"))
+```
+
+```{r}
+anti <- train_df %>% inner_join(test_df, by='image.id')
+anti
+```
+
+```{r}
+intersect(train_df$image.id, test_df$image.id) 
+```
+
+
+```{r}
+show.images <-  function(n, df){
+  
+  layout(matrix(1:n,ncol=4,byr=T))
+
+   for(i in seq(1,n,1)){
+    image.id <- df$image.id[i]
+    plot(load.image(glue("{DATASET.PATH}/images/{image.id}.jpg")))
+   }
+}
+```
+
+
+```{r}
+files <- read_csv(glue("{DATASET.PATH}/image_attributes.csv")) %>% mutate(image.id = as.integer(str_sub(filename, 0, -5)))  %>% select(-filename) %>% mutate(resolution = width*height)
+
+ava.image.dataset <- as.tibble(read_delim(glue("{DATASET.PATH}/AVA.txt"), " ", col_names = F)) 
+colnames(ava.image.dataset) <- c('index', 'image.id', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10','semantic.tag.id1', 'semantic.tag.id2', 'challenge.id') 
+ava.image.dataset <- ava.image.dataset %>% mutate(image.id=as.integer(image.id)) %>% select(-index)
+
+
+ava.image.dataset <- ava.image.dataset %>% inner_join(ava.image.dataset %>% select(-semantic.tag.id1, -semantic.tag.id2, -challenge.id) %>% gather(-image.id, key = 'rating', value = 'number')  %>% group_by(image.id) %>% summarise(rating.mean=weighted.mean(as.numeric(rating), number), rating.sd = weighted.sd(as.numeric(rating), number)) %>%  mutate(rating.mean.bucket=cut(rating.mean, breaks=1:10, labels=1:9)), by = c("image.id"))
+```
+
+
+
+
+## Overview
+
+
+### Check for missing files
+
+
+
+There are `r dim(files)[1]` files, but `r dim(ava.image.dataset)[1]` images in dataset.
+
+Date entries without image file were deleted.
+
+
+### Summary 
+
+
+The  dataset has `r dim(ava.image.dataset)[1]` rows and `r dim(ava.image.dataset)[2]` columns. 
+
+Columns:  `r colnames(ava.image.dataset)`
+
+
+__Sample rows__
+
+```{r}
+ava.image.dataset %>% arrange(desc(image.id)) %>% head()
+```
+
+
+
+```{r}
+ava.image.dataset <- ava.image.dataset %>% inner_join(files)
+rm(files)
+```
+
+
+
+## Univariate Analysis
+
+
+
+
+```{r}
+plot.dist.num.ratings <- ava.image.dataset %>% select(image.id, 1,2,3,4,5,6,7,8,9, 10) %>% gather(-image.id, key = 'rating', value = 'number') %>%
+mutate(rating=as.integer(rating)) %>% group_by(image.id) %>% summarize(number=sum(number)) %>%
+  ggplot() +
+  geom_histogram(aes(number), fill='steelblue', bins=50)
+```
+
+```{r}
+plot.dist.rating.mean <- ava.image.dataset %>%
+  ggplot() +
+  geom_histogram(aes(rating.mean), fill='steelblue', bins=70) 
+```
+
+```{r}
+
+plot.bar.rating.mean.bucket <- ava.image.dataset %>% group_by(rating.mean.bucket) %>%
+  summarise(n=n()) %>%
+  ggplot() +
+  geom_bar(aes(rating.mean.bucket, n), fill='steelblue', stat='identity') +
+  scale_y_continuous(labels=comma) +
+  geom_hline(yintercept = 1000)
+
+```
+
+
+```{r}
+plot.dist.aspect.ratio <- ava.image.dataset %>%
+  ggplot() +
+  geom_histogram(aes(aspect_ratio), fill='steelblue', bins=30)  +
+  scale_x_continuous(breaks=seq(0,5,0.25))
+```
+
+
+
+
+```{r}
+plot.dist.resolution <- ava.image.dataset %>%
+  ggplot() +
+  geom_histogram(aes(resolution), fill='steelblue', bins=30)  
+```
+
+```{r}
+
+plot.dist.file.size <- ava.image.dataset %>%
+  ggplot() +
+  geom_histogram(aes(file_size), fill='steelblue', bins=30)  
+```
+
+```{r}
+
+plot.dist.img.size <- ava.image.dataset %>%
+  ggplot() +
+  geom_histogram(aes(img_size), fill='steelblue', bins=30)  
+
+```
+
+
+```{r}
+
+plot.dist.width <- ava.image.dataset %>%
+  ggplot() +
+  geom_histogram(aes(width), fill='steelblue', bins=30)  
+
+```
+
+
+```{r}
+
+plot.dist.height<- ava.image.dataset %>%
+  ggplot() +
+  geom_histogram(aes(height), fill='steelblue', bins=30)  
+
+```
+
+
+```{r}
+
+plot.dist.depth <- ava.image.dataset %>%
+  ggplot() +
+  geom_histogram(aes(depth), fill='steelblue', bins=30)  
+
+```
+
+```{r}
+plot.dist.rating.sd <- ava.image.dataset %>%
+  ggplot() +
+  geom_histogram(aes(rating.sd), fill='steelblue', bins=30)  
+```
+
+```{r}
+
+grid.arrange(plot.dist.rating.mean,  plot.dist.rating.sd, plot.dist.num.ratings, plot.bar.rating.mean.bucket, ncol=2)
+```
+
+
+```{r}
+grid.arrange(plot.dist.aspect.ratio, plot.dist.file.size, plot.dist.img.size, plot.dist.width, plot.dist.height, plot.dist.depth, plot.dist.resolution, ncol=3)
+```
+
+
+### Best rated Images
+
+```{r}
+show.images(8, ava.image.dataset %>% arrange(desc(rating.mean)))
+```
+
+### Worst rated Images
+
+```{r}
+
+show.images(8, ava.image.dataset %>% arrange(rating.mean))
+```
+
+## Bivariate Analysis
+
+```{r}
+corrplot(cor(ava.image.dataset %>% select(rating.mean, rating.sd, file_size, width, height, img_size, aspect_ratio, resolution)), method = "pie")
+```
+
+
+
+```{r}
+corr.rating.mean.file.size <- ava.image.dataset %>%
+  ggplot(aes(x=rating.mean, y=file_size)) +
+  geom_point(color='steelblue', alpha=0.4) 
+```
+
+
+
+
+```{r}
+corr.rating.mean.img.size <- ava.image.dataset %>%
+  ggplot(aes(x=rating.mean, y=img_size)) +
+  geom_point(color='steelblue', alpha=0.4) 
+```
+
+
+
+
+```{r}
+corr.rating.mean.aspect.ratio <- ava.image.dataset %>%
+  ggplot(aes(x=rating.mean, y=aspect_ratio)) +
+  geom_point(color='steelblue', alpha=0.4)  
+```
+
+```{r}
+corr.rating.mean.resolution <- ava.image.dataset %>%
+  ggplot(aes(x=rating.mean, y=resolution)) +
+  geom_point(color='steelblue', alpha=0.4)  
+```
+
+```{r}
+grid.arrange(corr.rating.mean.file.size, corr.rating.mean.img.size, corr.rating.mean.aspect.ratio, corr.rating.mean.resolution, ncol=2)
+```
+
+
+
+
+## Extraction of data for Model Iteration 1
+
+
+
+```{r}
+table(ava.image.dataset$rating.mean.bucket)
+```
+
+
+
+```{r}
+ava.image.dataset$rating.mean.bucket2 <- ava.image.dataset$rating.mean.bucket 
+
+
+ava.image.dataset <- ava.image.dataset %>%  mutate(rating.mean.bucket2 = replace(rating.mean.bucket2, rating.mean.bucket2==2, 3))
+ava.image.dataset <- ava.image.dataset %>%  mutate(rating.mean.bucket2 = replace(rating.mean.bucket2, rating.mean.bucket2==1, 3))
+ava.image.dataset <- ava.image.dataset %>%  mutate(rating.mean.bucket2 = replace(rating.mean.bucket2, rating.mean.bucket2==8, 7))
+```
+
+
+
+```{r}
+
+table(ava.image.dataset$rating.mean.bucket2)
+```
+```{r}
+ava.image.dataset <- ava.image.dataset %>% arrange(rating.mean) 
+```
+
+```{r}
+#write.csv(ava.image.dataset, glue("{DATASET.PATH}/images_meta.csv"))
+```
+
+

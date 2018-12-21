@@ -1,0 +1,8 @@
+projects/capstone/notebooks/src/
+projects/capstone/src/
+src/
+*.hdf5
+.ipynb_checkpoints/
+.Rhistory
+.RData
+notebooks/imageaesthetics/__pycache__/

@@ -1,0 +1,80 @@
+---
+title: "Exploratory Data Analysis of AADB dataset"
+author: "Jens Laufer"
+date: "9 Juli 2018"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, warning=F, message=F, fig.width = 20, fig.height = 10)
+```
+
+```{r}
+library(tidyverse)
+library(imager)
+library(glue)
+library(scales)
+```
+
+```{r}
+DATASET.PATH = '../data/AADB'
+```
+
+## AADB
+
+```{r}
+aadb.images.metadata <- read_delim(glue('{DATASET.PATH}/labels/imgListFiles_label/imgListTrainRegression_score.txt'), delim=" ", col_names = F)
+colnames(aadb.images.metadata) <- c('image.id', 'rating')
+
+aadb.images.metadata <- aadb.images.metadata %>%
+                        mutate(rating.level=cut(rating, seq(0,1,0.2)))
+           
+```
+
+```{r}
+table(aadb.images.metadata$rating.level)
+```
+
+
+```{r}
+str(aadb.images.metadata)
+
+```
+
+
+```{r}
+aadb.images.metadata %>%
+  ggplot(aes(x=rating)) +
+  geom_histogram(fill='steelblue', bins=15) +
+  scale_x_continuous(breaks=seq(0,1, 0.02))
+```
+
+```{r}
+show.aadb.images <-  function(n, df){
+  
+  layout(matrix(1:n,ncol=4,byr=T))
+
+   for(i in seq(1,n,1)){
+     
+      filename <- df$image.id[i]
+      plot(load.image(glue("{DATASET.PATH}/train/datasetImages_originalSize/{filename}")))
+   }
+}
+```
+
+```{r}
+show.aadb.images(8, aadb.images.metadata %>% arrange(desc(rating)))
+```
+
+
+
+```{r}
+
+show.aadb.images(8, aadb.images.metadata %>% arrange(rating))
+```
+
+
+
+
+

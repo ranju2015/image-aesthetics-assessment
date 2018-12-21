@@ -1,0 +1,11 @@
+model,nsamples,basemodel,dropout,lrdense,lrall,lrdecaydense,lrdecayall,epochsdense,epochsall
+model0,10,keras.applications.mobilenet.MobileNet,0.75,0.001,0.00003,0,0,2,2
+model1,10,keras.applications.mobilenet.MobileNet,0.75,0.001,0.00003,0,0,10,20
+model2,100,keras.applications.mobilenet.MobileNet,0.75,0.001,0.00003,0,0,10,20
+model3,100,keras.applications.mobilenet.MobileNet,0.75,0.001,0.00003,0,0,5,9
+model4,100,keras.applications.mobilenet.MobileNet,0.75,0.001,0.00003,0,0,5,9
+model5,1000,keras.applications.mobilenet.MobileNet,0.75,0.001,0.00003,0,0.000023,5,9
+model6,1000,keras.applications.mobilenet.MobileNet,0.75,0.001,0.00003,0,0.000023,7,11
+model7,1500,keras.applications.mobilenet.MobileNet,0.75,0.001,0.00003,0,0.000023,5,9
+model8,2500,keras.applications.mobilenet.MobileNet,0.75,0.001,0.00003,0,0.000023,5,9
+model9,5000,keras.applications.mobilenet.MobileNet,0.75,0.001,0.00003,0,0.000023,5,9

@@ -1,0 +1,75 @@
+---
+title: "Exploratory Data Analysis on AROD"
+author: "Jens Laufer"
+date: "9 Juli 2018"
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, warning=F, message=F, fig.width = 20, fig.height = 10)
+```
+
+```{r}
+library(tidyverse)
+library(imager)
+library(glue)
+library(scales)
+```
+```{r}
+DATASET.PATH = '../data/will-people-like-your-image/arod'
+```
+
+
+## AROD
+
+```{r}
+arod.image.dataset <- read_delim(glue("{DATASET.PATH}/list.txt"),";", col_names = F)
+colnames(arod.image.dataset) <- c("image_url", "favs", "views")
+
+arod.image.dataset <- arod.image.dataset %>%
+                      mutate(favs=replace(favs,0,0.0000001), views=replace(views, 0,0.0000001)) %>%
+                      mutate(score=log10(favs)/log10(views)) %>%
+                      mutate(score.norm=rescale(score, to=c(0,10))) %>%
+                      filter(score > 0) %>%
+                      mutate(score.bucket=cut(score.norm, breaks=10))
+  
+```
+
+```{r}
+arod.image.dataset %>% 
+  arrange(desc(score))
+```
+```{r}
+mean(arod.image.dataset$views)
+```
+
+
+```{r}
+arod.image.dataset %>%
+  ggplot() +
+  geom_histogram(aes(score.norm), bins = 100, fill = 'steelblue')
+```
+
+
+
+```{r}
+arod.image.dataset %>% group_by(score.bucket) %>%
+  summarise(n=n()) %>%
+  ggplot() +
+  geom_bar(aes(score.bucket,n), stat='identity', fill = 'steelblue') +
+  geom_hline(yintercept = 1000) +
+  scale_y_continuous(breaks = seq(0,150000,10000))
+```
+
+
+
+```{r}
+arod.image.dataset %>%
+  ggplot() +
+  geom_histogram(aes(views), bins=50)
+```
+
+
+
+
