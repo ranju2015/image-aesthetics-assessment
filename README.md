@@ -1,4 +1,4 @@
-# Machine Learning Nano Degree Capstone Project: "Image Aesthetics Assessment"
+# "Image Aesthetics Assessment"
 
 ## Dataset 
 
