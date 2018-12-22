@@ -367,13 +367,54 @@ This is problematic thas the model performance might not sufficient for images w
 ### Algorithms and Techniques
 
 
-Transfer learning involves the approach in which knowledge learned in one task is transferred and used to improve the learning of a related target task.
+#### Convolutional Neural Networks (CNN)
+
+A Convolutional Neural Network (CNN) will be used to solve the problem of image aesthetics assessment. They are deep neural networks inspired by biological processes and most commonly applied to analyzing visual imagery.
+
+
+CNNs consist of an input, an output layer and several hidden layers. The hidden layers are typically a convolutional layer followed by a pooling layer.
+
+
+```{r, out.width = "70%", fig.cap="Structure of a typical CNN for image classification. The network has multiple filtering kernels for each convolution layer, which extract features. Subsampling or Pooling layers are used for information reduction. (Source Wikipedia)"}
+include_graphics('resources/Typical_cnn.png')
+```
+
+_Convolutional Layer_
+
+The purpose of the convolutional layer is to extract features from the input image. They preserve the spatial relationship between pixels by learning image features using small squares of input data. 
+
+
+```{r, size="20%", fig.cap='Convolutional operation to extract features'}
+include_graphics('resources/3_conv.png')
+```
+
+
+_Pooling Layer_
+
+Convolutional networks may include pooling layers. These layers combine the outputs of neuron clusters at one layer into a single neuron in the next layer. This is done for the following reasons
+
+- Reduction of memory and increase in execution speed
+- Reduction of overfitting
+
+```{r, out.width = "60%", fig.cap="MaxPooling layer, that extracts the maximum value in a region to reduce information. (Source Wikipedia)"}
+include_graphics('resources/Max_pooling.png')
+```
+
+_Fully connected Layer_
+
+After multiple layers of convolutional and pooling layers a fully connected layer completes the network. The fully connected layer is a traditional multi layer perceptron responsible for the classification task.
+
+#### Transfer Learning
+
+Transfer learning is a popular method in computer vision because it allows to build accurate models in a timesaving way [@rawat2017deep]. With transfer learning, instead of starting the learning process from scratch, you start from patterns that have been learned when solving a different problem. This way you leverage previous learnings and avoid starting from scratch. 
+
+In computer vision, transfer learning is usually expressed through the use of pre-trained models. A pre-trained model is a model that was trained on a large benchmark dataset to solve a problem similar to the one that we want to solve. Accordingly, due to the computational cost of training such models, it is common practice to import and use models from published literature (e.g. VGG, Inception, MobileNet). 
+
 
 ```{r, out.width = "50%", fig.cap="Transfer learning"}
 include_graphics('resources/transferlearning.png')
 ```
 
-This approach is used to train the predictor instead of designing a Convolutional Neural Network (CNN) from the scratch, as it saves compute power. The compute power within this project is restricted to a one GPU AWS cloud instances (p2.xlarge) and the dataset is quiet big. Several papers reported that it took days to train models on their own CNN architecture. The goal in this project is rather to restrict the time to teach the network to a few hours to save cost and try out different options.
 
 Several state-of-the-art image classification applications are based on the transfer learning solutions [@he2016deep], [@szegedy2016rethinking] Google reported in it's NIMA (Neural Image Assessment) paper the highest accuracy with a transfer learning based model [@talebi2018nima]
 
