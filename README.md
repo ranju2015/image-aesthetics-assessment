@@ -1,4 +1,4 @@
-# "Image Aesthetics Assessment"
+# Image Aesthetics Assessment
 
 ## Dataset 
 
